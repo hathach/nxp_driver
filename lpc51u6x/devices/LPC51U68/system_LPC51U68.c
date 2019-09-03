@@ -250,7 +250,7 @@ void SystemInit (void) {
     extern void(*const g_pfnVectors[]) (void);
     SCB->VTOR = (uint32_t) &g_pfnVectors;
 #else
-    // extern void *__Vectors;
+    extern void *__Vectors;
     SCB->VTOR = (uint32_t) &__Vectors;
 #endif
 
