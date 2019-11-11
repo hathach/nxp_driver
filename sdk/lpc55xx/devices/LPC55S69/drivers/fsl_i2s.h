@@ -8,9 +8,9 @@
 #ifndef _FSL_I2S_H_
 #define _FSL_I2S_H_
 
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_common.h>
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_flexcomm.h>
 #include "fsl_device_registers.h"
+#include "fsl_common.h"
+#include "fsl_flexcomm.h"
 
 /*******************************************************************************
  * Definitions

@@ -163,8 +163,8 @@ typedef enum IRQn {
 #define __DSP_PRESENT                  0         /**< Defines if Armv8-M Mainline core supports DSP instructions */
 #define __SAUREGION_PRESENT            0         /**< Defines if an SAU is present or not */
 
-#include <mcu/nxp/lpc_driver/lpc55xx/CMSIS/Include/core_cm33.h>                 /* Core Peripheral Access Layer */
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/system_LPC55S69_cm33_core1.h> /* Device specific configuration file */
+#include "core_cm33.h"                 /* Core Peripheral Access Layer */
+#include "system_LPC55S69_cm33_core1.h" /* Device specific configuration file */
 
 /*!
  * @}

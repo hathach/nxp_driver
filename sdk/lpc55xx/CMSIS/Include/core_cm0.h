@@ -60,7 +60,7 @@
   @{
  */
 
-#include <mcu/nxp/lpc_driver/lpc55xx/CMSIS/Include/cmsis_version.h>
+#include "cmsis_version.h"
  
 /*  CMSIS CM0 definitions */
 #define __CM0_CMSIS_VERSION_MAIN  (__CM_CMSIS_VERSION_MAIN)              /*!< \deprecated [31:16] CMSIS HAL main version */
@@ -112,7 +112,7 @@
 
 #endif
 
-#include <mcu/nxp/lpc_driver/lpc55xx/CMSIS/Include/cmsis_compiler.h>               /* CMSIS compiler specific defines */
+#include "cmsis_compiler.h"               /* CMSIS compiler specific defines */
 
 
 #ifdef __cplusplus

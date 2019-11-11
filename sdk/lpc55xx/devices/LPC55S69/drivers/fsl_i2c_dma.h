@@ -8,8 +8,8 @@
 #ifndef _FSL_I2C_DMA_H_
 #define _FSL_I2C_DMA_H_
 
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_dma.h>
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_i2c.h>
+#include "fsl_i2c.h"
+#include "fsl_dma.h"
 
 /*!
  * @addtogroup i2c_dma_driver

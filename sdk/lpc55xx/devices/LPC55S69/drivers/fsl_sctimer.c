@@ -6,7 +6,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_sctimer.h>
+#include "fsl_sctimer.h"
 
 /*******************************************************************************
  * Definitions

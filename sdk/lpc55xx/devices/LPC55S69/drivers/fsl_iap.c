@@ -6,8 +6,8 @@
  *
  */
 
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_iap.h>
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_iap_ffr.h>
+#include "fsl_iap.h"
+#include "fsl_iap_ffr.h"
 #include "fsl_device_registers.h"
 /* Component ID definition, used by tools. */
 #ifndef FSL_COMPONENT_ID

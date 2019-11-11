@@ -8,8 +8,8 @@
 #ifndef _FSL_SPI_DMA_H_
 #define _FSL_SPI_DMA_H_
 
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_dma.h>
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_spi.h>
+#include "fsl_dma.h"
+#include "fsl_spi.h"
 
 /*!
  * @addtogroup spi_dma_driver

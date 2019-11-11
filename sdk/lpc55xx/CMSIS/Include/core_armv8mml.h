@@ -60,7 +60,7 @@
   @{
  */
 
-#include <mcu/nxp/lpc_driver/lpc55xx/CMSIS/Include/cmsis_version.h>
+#include "cmsis_version.h"
  
 /*  CMSIS Armv8MML definitions */
 #define __ARMv8MML_CMSIS_VERSION_MAIN  (__CM_CMSIS_VERSION_MAIN)                   /*!< \deprecated [31:16] CMSIS HAL main version */
@@ -203,7 +203,7 @@
 
 #endif
 
-#include <mcu/nxp/lpc_driver/lpc55xx/CMSIS/Include/cmsis_compiler.h>               /* CMSIS compiler specific defines */
+#include "cmsis_compiler.h"               /* CMSIS compiler specific defines */
 
 
 #ifdef __cplusplus
@@ -2718,7 +2718,7 @@ __STATIC_INLINE uint32_t TZ_NVIC_GetPriority_NS(IRQn_Type IRQn)
 
 #if defined (__MPU_PRESENT) && (__MPU_PRESENT == 1U)
 
-#include <mcu/nxp/lpc_driver/lpc55xx/CMSIS/Include/mpu_armv8.h>
+#include "mpu_armv8.h"
 
 #endif
 

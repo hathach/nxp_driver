@@ -6,8 +6,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_flexcomm.h>
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_i2s.h>
+#include "fsl_i2s.h"
+#include "fsl_flexcomm.h"
 #include <string.h>
 
 /*******************************************************************************

@@ -5,9 +5,9 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <mcu/nxp/lpc_driver/lpc55xx/CMSIS/Include/arm_math.h>
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_powerquad.h>
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_powerquad_data.h>
+#include "fsl_powerquad.h"
+#include "fsl_powerquad_data.h"
+#include "arm_math.h"
 
 /*******************************************************************************
  * Definitions

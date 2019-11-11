@@ -9,7 +9,7 @@
 #ifndef _LPC_GPIO_H_
 #define _LPC_GPIO_H_
 
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_common.h>
+#include "fsl_common.h"
 
 /*!
  * @addtogroup lpc_gpio

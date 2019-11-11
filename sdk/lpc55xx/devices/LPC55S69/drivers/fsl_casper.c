@@ -6,8 +6,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include "fsl_casper.h"
 #include <math.h> /* ceil TODO check if really need it */
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_casper.h>
 
 /*******************************************************************************
  * Definitions
@@ -379,12 +379,12 @@ void Jac_addition(uint32_t *X3,
 /* Compute (X3 : Y3: Z3) = (X1: Y1: Z1) + (X2, Y2)
  * where (X1: Y1: Z1) != (X2, Y2)
  * (X3 : Y3: Z3) may not overlap with (X1: Y1: Z1).
- * Source: 2004 Hankersonï¿½Menezesï¿½Vanstone, page 91.
+ * Source: 2004 Hankerson–Menezes–Vanstone, page 91.
  */
 void Jac_add_affine(
     uint32_t *X3, uint32_t *Y3, uint32_t *Z3, uint32_t *X1, uint32_t *Y1, uint32_t *Z1, uint32_t *X2, uint32_t *Y2);
 
-/* Point doubling from: 2004 Hankersonï¿½Menezesï¿½Vanstone, page 91.
+/* Point doubling from: 2004 Hankerson–Menezes–Vanstone, page 91.
  * Compute (X3 : Y3: Z3) = (X1: Y1: Z1) + (X1 : Y1 : Z1)
  * (X3 : Y3: Z3) may be the same as the input.
  */
@@ -1703,7 +1703,7 @@ void Jac_addition(uint32_t *X3,
 /* Compute (X3 : Y3: Z3) = (X1: Y1: Z1) + (X2, Y2)
  * where (X1: Y1: Z1) != (X2, Y2)
  * (X3 : Y3: Z3) may not overlap with (X1: Y1: Z1).
- * Source: 2004 Hankersonï¿½Menezesï¿½Vanstone, page 91.
+ * Source: 2004 Hankerson–Menezes–Vanstone, page 91.
  */
 void Jac_add_affine(
     uint32_t *X3, uint32_t *Y3, uint32_t *Z3, uint32_t *X1, uint32_t *Y1, uint32_t *Z1, uint32_t *X2, uint32_t *Y2)
@@ -1765,7 +1765,7 @@ void Jac_add_affine(
 
 extern uint32_t casper_get_word(uint32_t *addr);
 
-/* Point doubling from: 2004 Hankersonï¿½Menezesï¿½Vanstone, page 91.
+/* Point doubling from: 2004 Hankerson–Menezes–Vanstone, page 91.
  * Compute (X3 : Y3: Z3) = (X1: Y1: Z1) + (X1 : Y1 : Z1)
  * (X3 : Y3: Z3) may be the same as the input.
  */

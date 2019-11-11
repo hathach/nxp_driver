@@ -8,8 +8,7 @@
 #ifndef __FSL_USART_FREERTOS_H__
 #define __FSL_USART_FREERTOS_H__
 
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_usart.h>
-
+#include "fsl_usart.h"
 #include <FreeRTOS.h>
 #include <event_groups.h>
 #include <semphr.h>

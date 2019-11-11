@@ -6,11 +6,11 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_dma.h>
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_flexcomm.h>
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_usart.h>
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_usart_dma.h>
+#include "fsl_usart.h"
 #include "fsl_device_registers.h"
+#include "fsl_dma.h"
+#include "fsl_flexcomm.h"
+#include "fsl_usart_dma.h"
 
 /* Component ID definition, used by tools. */
 #ifndef FSL_COMPONENT_ID

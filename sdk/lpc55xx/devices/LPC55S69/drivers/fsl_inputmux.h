@@ -9,8 +9,8 @@
 #ifndef _FSL_INPUTMUX_H_
 #define _FSL_INPUTMUX_H_
 
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_common.h>
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_inputmux_connections.h>
+#include "fsl_inputmux_connections.h"
+#include "fsl_common.h"
 
 /*!
  * @addtogroup inputmux_driver

@@ -6,8 +6,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_usart_freertos.h>
-
+#include "fsl_usart_freertos.h"
 #include <FreeRTOS.h>
 #include <event_groups.h>
 #include <semphr.h>

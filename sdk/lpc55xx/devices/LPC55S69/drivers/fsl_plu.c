@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_plu.h>
+#include "fsl_plu.h"
 
 /* Component ID definition, used by tools. */
 #ifndef FSL_COMPONENT_ID

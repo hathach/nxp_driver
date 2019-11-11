@@ -8,8 +8,8 @@
 #ifndef _FSL_SPI_H_
 #define _FSL_SPI_H_
 
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_common.h>
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_flexcomm.h>
+#include "fsl_common.h"
+#include "fsl_flexcomm.h"
 
 /*!
  * @addtogroup spi_driver

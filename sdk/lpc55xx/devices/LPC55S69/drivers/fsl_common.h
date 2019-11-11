@@ -381,14 +381,14 @@ _Pragma("diag_suppress=Pm120")
  * The fsl_clock.h is included here because it needs MAKE_VERSION/MAKE_STATUS/status_t
  * defined in previous of this file.
  */
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_clock.h>
+#include "fsl_clock.h"
 
 /*
  * Chip level peripheral reset API, for MCUs that implement peripheral reset control external to a peripheral
  */
 #if ((defined(FSL_FEATURE_SOC_SYSCON_COUNT) && (FSL_FEATURE_SOC_SYSCON_COUNT > 0)) || \
      (defined(FSL_FEATURE_SOC_ASYNC_SYSCON_COUNT) && (FSL_FEATURE_SOC_ASYNC_SYSCON_COUNT > 0)))
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_reset.h>
+#include "fsl_reset.h"
 #endif
 
 /*******************************************************************************

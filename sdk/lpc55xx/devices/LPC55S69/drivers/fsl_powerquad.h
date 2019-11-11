@@ -16,8 +16,8 @@
 #include <arm_acle.h>
 #endif /* defined(__CC_ARM) */
 
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_common.h>
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_powerquad_data.h>
+#include "fsl_common.h"
+#include "fsl_powerquad_data.h"
 
 /*!
  * @addtogroup powerquad

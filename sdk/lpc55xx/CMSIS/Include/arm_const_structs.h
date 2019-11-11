@@ -30,8 +30,8 @@
 #ifndef _ARM_CONST_STRUCTS_H
 #define _ARM_CONST_STRUCTS_H
 
-#include <mcu/nxp/lpc_driver/lpc55xx/CMSIS/Include/arm_common_tables.h>
-#include <mcu/nxp/lpc_driver/lpc55xx/CMSIS/Include/arm_math.h>
+#include "arm_math.h"
+#include "arm_common_tables.h"
 
    extern const arm_cfft_instance_f32 arm_cfft_sR_f32_len16;
    extern const arm_cfft_instance_f32 arm_cfft_sR_f32_len32;

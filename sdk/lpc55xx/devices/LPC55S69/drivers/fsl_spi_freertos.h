@@ -8,12 +8,11 @@
 #ifndef __FSL_SPI_FREERTOS_H__
 #define __FSL_SPI_FREERTOS_H__
 
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_spi.h>
-
 #include "FreeRTOS.h"
 #include "portable.h"
 #include "semphr.h"
 
+#include "fsl_spi.h"
 
 /*!
  * @addtogroup spi_freertos_driver

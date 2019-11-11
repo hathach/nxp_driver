@@ -60,7 +60,7 @@
   @{
  */
 
-#include <mcu/nxp/lpc_driver/lpc55xx/CMSIS/Include/cmsis_version.h>
+#include "cmsis_version.h"
  
 /* CMSIS CM4 definitions */
 #define __CM4_CMSIS_VERSION_MAIN  (__CM_CMSIS_VERSION_MAIN)              /*!< \deprecated [31:16] CMSIS HAL main version */
@@ -159,7 +159,7 @@
 
 #endif
 
-#include <mcu/nxp/lpc_driver/lpc55xx/CMSIS/Include/cmsis_compiler.h>               /* CMSIS compiler specific defines */
+#include "cmsis_compiler.h"               /* CMSIS compiler specific defines */
 
 
 #ifdef __cplusplus
@@ -1946,7 +1946,7 @@ __STATIC_INLINE void __NVIC_SystemReset(void)
 
 #if defined (__MPU_PRESENT) && (__MPU_PRESENT == 1U)
 
-#include <mcu/nxp/lpc_driver/lpc55xx/CMSIS/Include/mpu_armv7.h>
+#include "mpu_armv7.h"
 
 #endif
 

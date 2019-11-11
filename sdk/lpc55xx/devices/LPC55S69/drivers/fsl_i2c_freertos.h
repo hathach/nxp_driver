@@ -8,12 +8,11 @@
 #ifndef __FSL_I2C_FREERTOS_H__
 #define __FSL_I2C_FREERTOS_H__
 
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_i2c.h>
-
 #include "FreeRTOS.h"
 #include "portable.h"
 #include "semphr.h"
 
+#include "fsl_i2c.h"
 
 /*!
  * @addtogroup i2c_freertos_driver I2C FreeRTOS Driver

@@ -29,7 +29,7 @@
 #ifndef _ARM_COMMON_TABLES_H
 #define _ARM_COMMON_TABLES_H
 
-#include <mcu/nxp/lpc_driver/lpc55xx/CMSIS/Include/arm_math.h>
+#include "arm_math.h"
 
 extern const uint16_t armBitRevTable[1024];
 extern const q15_t armRecipTableQ15[64];

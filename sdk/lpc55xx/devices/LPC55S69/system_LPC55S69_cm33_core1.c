@@ -45,8 +45,8 @@
  * (PLL) that is part of the microcontroller device.
  */
 
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/fsl_device_registers.h>
 #include <stdint.h>
+#include "fsl_device_registers.h"
 
 /* PLL0 SSCG control1 */
 #define PLL_SSCG_MD_FRACT_P 0U

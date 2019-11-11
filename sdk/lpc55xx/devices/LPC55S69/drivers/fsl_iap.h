@@ -9,7 +9,7 @@
 #ifndef __FSL_IAP_H_
 #define __FSL_IAP_H_
 
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_common.h>
+#include "fsl_common.h"
 /*!
  * @addtogroup flash_driver
  * @{

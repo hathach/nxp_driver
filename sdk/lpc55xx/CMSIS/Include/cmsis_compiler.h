@@ -31,21 +31,21 @@
  * Arm Compiler 4/5
  */
 #if   defined ( __CC_ARM )
-  #include <mcu/nxp/lpc_driver/lpc55xx/CMSIS/Include/cmsis_armcc.h>
+  #include "cmsis_armcc.h"
 
 
 /*
  * Arm Compiler 6 (armclang)
  */
 #elif defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
-  #include <mcu/nxp/lpc_driver/lpc55xx/CMSIS/Include/cmsis_armclang.h>
+  #include "cmsis_armclang.h"
 
 
 /*
  * GNU Compiler
  */
 #elif defined ( __GNUC__ )
-  #include <mcu/nxp/lpc_driver/lpc55xx/CMSIS/Include/cmsis_gcc.h>
+  #include "cmsis_gcc.h"
 
 
 /*

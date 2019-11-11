@@ -6,7 +6,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_i2c_freertos.h>
+#include "fsl_i2c_freertos.h"
 
 /* Component ID definition, used by tools. */
 #ifndef FSL_COMPONENT_ID

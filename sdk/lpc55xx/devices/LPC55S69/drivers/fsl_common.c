@@ -7,7 +7,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_common.h>
+#include "fsl_common.h"
 #define SDK_MEM_MAGIC_NUMBER 12345U
 
 typedef struct _mem_align_control_block

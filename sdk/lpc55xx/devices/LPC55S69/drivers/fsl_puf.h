@@ -9,10 +9,10 @@
 #ifndef _PUF_H_
 #define _PUF_H_
 
-#include <mcu/nxp/lpc_driver/lpc55xx/devices/LPC55S69/drivers/fsl_common.h>
 #include <stddef.h>
 #include <stdint.h>
 
+#include "fsl_common.h"
 
 typedef enum _puf_key_index_register
 {
