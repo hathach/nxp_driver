@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015-2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2018 NXP
+ * Copyright 2016-2020 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -21,12 +21,17 @@
 
 /*! @name Driver version */
 /*@{*/
-/*! @brief LPUART driver version 2.2.7. */
-#define FSL_LPUART_DRIVER_VERSION (MAKE_VERSION(2, 2, 7))
+/*! @brief LPUART driver version 2.3.0. */
+#define FSL_LPUART_DRIVER_VERSION (MAKE_VERSION(2, 3, 0))
 /*@}*/
 
+/*! @brief Retry times for waiting flag. */
+#ifndef UART_RETRY_TIMES
+#define UART_RETRY_TIMES 0U /* Defining to zero means to keep waiting for the flag until it is assert/deassert. */
+#endif
+
 /*! @brief Error codes for the LPUART driver. */
-enum _lpuart_status
+enum
 {
     kStatus_LPUART_TxBusy                  = MAKE_STATUS(kStatusGroup_LPUART, 0), /*!< TX busy */
     kStatus_LPUART_RxBusy                  = MAKE_STATUS(kStatusGroup_LPUART, 1), /*!< RX busy */
@@ -45,6 +50,7 @@ enum _lpuart_status
     kStatus_LPUART_BaudrateNotSupport =
         MAKE_STATUS(kStatusGroup_LPUART, 13), /*!< Baudrate is not support in current clock source */
     kStatus_LPUART_IdleLineDetected = MAKE_STATUS(kStatusGroup_LPUART, 14), /*!< IDLE flag. */
+    kStatus_LPUART_Timeout          = MAKE_STATUS(kStatusGroup_LPUART, 15), /*!< LPUART times out. */
 };
 
 /*! @brief LPUART parity mode. */
@@ -423,7 +429,7 @@ status_t LPUART_ClearStatusFlags(LPUART_Type *base, uint32_t mask);
  * @endcode
  *
  * @param base LPUART peripheral base address.
- * @param mask The interrupts to enable. Logical OR of @ref _uart_interrupt_enable.
+ * @param mask The interrupts to enable. Logical OR of the enumeration _uart_interrupt_enable.
  */
 void LPUART_EnableInterrupts(LPUART_Type *base, uint32_t mask);
 
@@ -601,18 +607,21 @@ static inline uint8_t LPUART_ReadByte(LPUART_Type *base)
 {
 #if defined(FSL_FEATURE_LPUART_HAS_7BIT_DATA_SUPPORT) && FSL_FEATURE_LPUART_HAS_7BIT_DATA_SUPPORT
     uint32_t ctrl = base->CTRL;
-    bool isSevenDataBits =
-        ((ctrl & LPUART_CTRL_M7_MASK) ||
-         ((!(ctrl & LPUART_CTRL_M7_MASK)) && (!(ctrl & LPUART_CTRL_M_MASK)) && (ctrl & LPUART_CTRL_PE_MASK)));
+    uint8_t result;
+    bool isSevenDataBits = (((ctrl & LPUART_CTRL_M7_MASK) != 0U) ||
+                            (((ctrl & LPUART_CTRL_M7_MASK) == 0U) && ((ctrl & LPUART_CTRL_M_MASK) == 0U) &&
+                             ((ctrl & LPUART_CTRL_PE_MASK) != 0U)));
 
     if (isSevenDataBits)
     {
-        return (base->DATA & 0x7F);
+        result = (uint8_t)(base->DATA & 0x7FU);
     }
     else
     {
-        return base->DATA;
+        result = (uint8_t)base->DATA;
     }
+
+    return result;
 #else
     return (uint8_t)(base->DATA);
 #endif
@@ -621,18 +630,16 @@ static inline uint8_t LPUART_ReadByte(LPUART_Type *base)
 /*!
  * @brief Writes to the transmitter register using a blocking method.
  *
- * This function polls the transmitter register, waits for the register to be empty or  for TX FIFO to have
- * room, and writes data to the transmitter buffer.
- *
- * @note This function does not check whether all data has been sent out to the bus.
- * Before disabling the transmitter, check the kLPUART_TransmissionCompleteFlag to ensure that the transmit is
- * finished.
+ * This function polls the transmitter register, first waits for the register to be empty or TX FIFO to have room,
+ * and writes data to the transmitter buffer, then waits for the dat to be sent out to the bus.
  *
  * @param base LPUART peripheral base address.
  * @param data Start address of the data to write.
  * @param length Size of the data to write.
+ * @retval kStatus_LPUART_Timeout Transmission timed out and was aborted.
+ * @retval kStatus_Success Successfully wrote all data.
  */
-void LPUART_WriteBlocking(LPUART_Type *base, const uint8_t *data, size_t length);
+status_t LPUART_WriteBlocking(LPUART_Type *base, const uint8_t *data, size_t length);
 
 /*!
  * @brief Reads the receiver data register using a blocking method.
@@ -647,6 +654,7 @@ void LPUART_WriteBlocking(LPUART_Type *base, const uint8_t *data, size_t length)
  * @retval kStatus_LPUART_NoiseError Noise error happened while receiving data.
  * @retval kStatus_LPUART_FramingError Framing error happened while receiving data.
  * @retval kStatus_LPUART_ParityError Parity error happened while receiving data.
+ * @retval kStatus_LPUART_Timeout Transmission timed out and was aborted.
  * @retval kStatus_Success Successfully received all data.
  */
 status_t LPUART_ReadBlocking(LPUART_Type *base, uint8_t *data, size_t length);
@@ -736,6 +744,7 @@ void LPUART_TransferStopRingBuffer(LPUART_Type *base, lpuart_handle_t *handle);
 /*!
  * @brief Get the length of received data in RX ring buffer.
  *
+ * @param base LPUART peripheral base address.
  * @param handle LPUART handle pointer.
  * @return Length of received data in RX ring buffer.
  */
@@ -753,10 +762,9 @@ size_t LPUART_TransferGetRxRingBufferLength(LPUART_Type *base, lpuart_handle_t *
 void LPUART_TransferAbortSend(LPUART_Type *base, lpuart_handle_t *handle);
 
 /*!
- * @brief Gets the number of bytes that have been written to the LPUART transmitter register.
+ * @brief Gets the number of bytes that have been sent out to bus.
  *
- * This function gets the number of bytes that have been written to LPUART TX
- * register by an interrupt method.
+ * This function gets the number of bytes that have been sent out to bus by an interrupt method.
  *
  * @param base LPUART peripheral base address.
  * @param handle LPUART handle pointer.
@@ -777,7 +785,7 @@ status_t LPUART_TransferGetSendCount(LPUART_Type *base, lpuart_handle_t *handle,
  * After copying, if the data in the ring buffer is not enough for read, the receive
  * request is saved by the LPUART driver. When the new data arrives, the receive request
  * is serviced first. When all data is received, the LPUART driver notifies the upper layer
- * through a callback function and passes a status parameter @ref kStatus_UART_RxIdle.
+ * through a callback function and passes a status parameter kStatus_UART_RxIdle.
  * For example, the upper layer needs 10 bytes but there are only 5 bytes in ring buffer.
  * The 5 bytes are copied to xfer->data, which returns with the
  * parameter @p receivedBytes set to 5. For the remaining 5 bytes, the newly arrived data is
@@ -787,7 +795,7 @@ status_t LPUART_TransferGetSendCount(LPUART_Type *base, lpuart_handle_t *handle,
  *
  * @param base LPUART peripheral base address.
  * @param handle LPUART handle pointer.
- * @param xfer LPUART transfer structure, see #uart_transfer_t.
+ * @param xfer LPUART transfer structure, see uart_transfer_t.
  * @param receivedBytes Bytes received from the ring buffer directly.
  * @retval kStatus_Success Successfully queue the transfer into the transmit queue.
  * @retval kStatus_LPUART_RxBusy Previous receive request is not finished.
