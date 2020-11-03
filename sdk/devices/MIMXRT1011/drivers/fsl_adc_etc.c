@@ -136,7 +136,7 @@ void ADC_ETC_Deinit(ADC_ETC_Type *base)
 void ADC_ETC_GetDefaultConfig(adc_etc_config_t *config)
 {
     /* Initializes the configure structure to zero. */
-    memset(config, 0, sizeof(*config));
+    (void)memset(config, 0, sizeof(*config));
 
     config->enableTSCBypass   = true;
     config->enableTSC0Trigger = false;
@@ -202,7 +202,7 @@ void ADC_ETC_SetTriggerChainConfig(ADC_ETC_Type *base,
 
     uint32_t tmp32     = 0U;
     uint32_t tmpReg    = 0U;
-    uint8_t mRemainder = chainGroup % 2U;
+    uint8_t mRemainder = (uint8_t)(chainGroup % 2U);
 
     /*  Set ADC_ETC_TRIGn_CHAINm register. */
     tmp32 = ADC_ETC_TRIGn_CHAIN_1_0_HWTS0(config->ADCHCRegisterSelect) |
@@ -285,6 +285,7 @@ void ADC_ETC_SetTriggerChainConfig(ADC_ETC_Type *base,
             base->TRIG[triggerGroup].TRIGn_CHAIN_7_6 = tmpReg;
             break;
         default:
+            assert(false);
             break;
     }
 }
@@ -301,32 +302,32 @@ uint32_t ADC_ETC_GetInterruptStatusFlags(ADC_ETC_Type *base, adc_etc_external_tr
 {
     uint32_t tmp32 = 0U;
 
-    if (((base->DONE0_1_IRQ) & (ADC_ETC_DONE0_1_IRQ_TRIG0_DONE0_MASK << sourceIndex)) != 0U)
+    if (((base->DONE0_1_IRQ) & ((uint32_t)ADC_ETC_DONE0_1_IRQ_TRIG0_DONE0_MASK << (uint32_t)sourceIndex)) != 0U)
     {
-        tmp32 |= kADC_ETC_Done0StatusFlagMask; /* Customized DONE0 status flags mask, which is defined in fsl_adc_etc.h
-                                                  file. */
+        tmp32 |= (uint32_t)kADC_ETC_Done0StatusFlagMask; /* Customized DONE0 status flags mask, which is defined in
+                                                  fsl_adc_etc.h file. */
     }
-    if (((base->DONE0_1_IRQ) & (ADC_ETC_DONE0_1_IRQ_TRIG0_DONE1_MASK << sourceIndex)) != 0U)
+    if (((base->DONE0_1_IRQ) & ((uint32_t)ADC_ETC_DONE0_1_IRQ_TRIG0_DONE1_MASK << (uint32_t)sourceIndex)) != 0U)
     {
-        tmp32 |= kADC_ETC_Done1StatusFlagMask; /* Customized DONE1 status flags mask, which is defined in fsl_adc_etc.h
-                                                  file. */
+        tmp32 |= (uint32_t)kADC_ETC_Done1StatusFlagMask; /* Customized DONE1 status flags mask, which is defined in
+                                                  fsl_adc_etc.h file. */
     }
-    if (((base->DONE2_ERR_IRQ) & (ADC_ETC_DONE2_ERR_IRQ_TRIG0_DONE2_MASK << sourceIndex)) != 0U)
+    if (((base->DONE2_ERR_IRQ) & ((uint32_t)ADC_ETC_DONE2_ERR_IRQ_TRIG0_DONE2_MASK << (uint32_t)sourceIndex)) != 0U)
     {
-        tmp32 |= kADC_ETC_Done2StatusFlagMask; /* Customized DONE2 status flags mask, which is defined in fsl_adc_etc.h
-                                                  file. */
+        tmp32 |= (uint32_t)kADC_ETC_Done2StatusFlagMask; /* Customized DONE2 status flags mask, which is defined in
+                                                  fsl_adc_etc.h file. */
     }
 #if defined(FSL_FEATURE_ADC_ETC_HAS_TRIGm_CHAIN_a_b_IEn_EN) && FSL_FEATURE_ADC_ETC_HAS_TRIGm_CHAIN_a_b_IEn_EN
-    if (((base->DONE2_ERR_IRQ) & (ADC_ETC_DONE2_ERR_IRQ_TRIG0_DONE3_MASK << sourceIndex)) != 0U)
+    if (((base->DONE2_ERR_IRQ) & ((uint32_t)ADC_ETC_DONE2_ERR_IRQ_TRIG0_DONE3_MASK << (uint32_t)sourceIndex)) != 0U)
     {
-        tmp32 |= kADC_ETC_Done3StatusFlagMask; /* Customized DONE3 status flags mask, which is defined in fsl_adc_etc.h
-                                                  file. */
+        tmp32 |= (uint32_t)kADC_ETC_Done3StatusFlagMask; /* Customized DONE3 status flags mask, which is defined in
+                                                  fsl_adc_etc.h file. */
     }
 #endif /* FSL_FEATURE_ADC_ETC_HAS_TRIGm_CHAIN_a_b_IEn_EN */
-    if (((base->DONE2_ERR_IRQ) & (ADC_ETC_DONE2_ERR_IRQ_TRIG0_ERR_MASK << sourceIndex)) != 0U)
+    if (((base->DONE2_ERR_IRQ) & ((uint32_t)ADC_ETC_DONE2_ERR_IRQ_TRIG0_ERR_MASK << (uint32_t)sourceIndex)) != 0U)
     {
-        tmp32 |= kADC_ETC_ErrorStatusFlagMask; /* Customized ERROR status flags mask, which is defined in fsl_adc_etc.h
-                                                  file. */
+        tmp32 |= (uint32_t)kADC_ETC_ErrorStatusFlagMask; /* Customized ERROR status flags mask, which is defined in
+                                                  fsl_adc_etc.h file. */
     }
     return tmp32;
 }
@@ -340,27 +341,27 @@ uint32_t ADC_ETC_GetInterruptStatusFlags(ADC_ETC_Type *base, adc_etc_external_tr
  */
 void ADC_ETC_ClearInterruptStatusFlags(ADC_ETC_Type *base, adc_etc_external_trigger_source_t sourceIndex, uint32_t mask)
 {
-    if (0U != (mask & kADC_ETC_Done0StatusFlagMask)) /* Write 1 to clear DONE0 status flags. */
+    if (0U != (mask & (uint32_t)kADC_ETC_Done0StatusFlagMask)) /* Write 1 to clear DONE0 status flags. */
     {
-        base->DONE0_1_IRQ = (ADC_ETC_DONE0_1_IRQ_TRIG0_DONE0_MASK << sourceIndex);
+        base->DONE0_1_IRQ = ((uint32_t)ADC_ETC_DONE0_1_IRQ_TRIG0_DONE0_MASK << (uint32_t)sourceIndex);
     }
-    if (0U != (mask & kADC_ETC_Done1StatusFlagMask)) /* Write 1 to clear DONE1 status flags. */
+    if (0U != (mask & (uint32_t)kADC_ETC_Done1StatusFlagMask)) /* Write 1 to clear DONE1 status flags. */
     {
-        base->DONE0_1_IRQ = (ADC_ETC_DONE0_1_IRQ_TRIG0_DONE1_MASK << sourceIndex);
+        base->DONE0_1_IRQ = ((uint32_t)ADC_ETC_DONE0_1_IRQ_TRIG0_DONE1_MASK << (uint32_t)sourceIndex);
     }
-    if (0U != (mask & kADC_ETC_Done2StatusFlagMask)) /* Write 1 to clear DONE2 status flags. */
+    if (0U != (mask & (uint32_t)kADC_ETC_Done2StatusFlagMask)) /* Write 1 to clear DONE2 status flags. */
     {
-        base->DONE2_ERR_IRQ = (ADC_ETC_DONE2_ERR_IRQ_TRIG0_DONE2_MASK << sourceIndex);
+        base->DONE2_ERR_IRQ = ((uint32_t)ADC_ETC_DONE2_ERR_IRQ_TRIG0_DONE2_MASK << (uint32_t)sourceIndex);
     }
 #if defined(FSL_FEATURE_ADC_ETC_HAS_TRIGm_CHAIN_a_b_IEn_EN) && FSL_FEATURE_ADC_ETC_HAS_TRIGm_CHAIN_a_b_IEn_EN
-    if (0U != (mask & kADC_ETC_Done3StatusFlagMask)) /* Write 1 to clear DONE3 status flags. */
+    if (0U != (mask & (uint32_t)kADC_ETC_Done3StatusFlagMask)) /* Write 1 to clear DONE3 status flags. */
     {
-        base->DONE2_ERR_IRQ = (ADC_ETC_DONE2_ERR_IRQ_TRIG0_DONE3_MASK << sourceIndex);
+        base->DONE2_ERR_IRQ = ((uint32_t)ADC_ETC_DONE2_ERR_IRQ_TRIG0_DONE3_MASK << (uint32_t)sourceIndex);
     }
-#endif                                               /* FSL_FEATURE_ADC_ETC_HAS_TRIGm_CHAIN_a_b_IEn_EN */
-    if (0U != (mask & kADC_ETC_ErrorStatusFlagMask)) /* Write 1 to clear ERROR status flags. */
+#endif                                                         /* FSL_FEATURE_ADC_ETC_HAS_TRIGm_CHAIN_a_b_IEn_EN */
+    if (0U != (mask & (uint32_t)kADC_ETC_ErrorStatusFlagMask)) /* Write 1 to clear ERROR status flags. */
     {
-        base->DONE2_ERR_IRQ = (ADC_ETC_DONE2_ERR_IRQ_TRIG0_ERR_MASK << sourceIndex);
+        base->DONE2_ERR_IRQ = ((uint32_t)ADC_ETC_DONE2_ERR_IRQ_TRIG0_ERR_MASK << (uint32_t)sourceIndex);
     }
 }
 
@@ -379,7 +380,7 @@ uint32_t ADC_ETC_GetADCConversionValue(ADC_ETC_Type *base, uint32_t triggerGroup
     assert(triggerGroup < ADC_ETC_TRIGn_RESULT_1_0_COUNT);
 
     uint32_t mADCResult;
-    uint8_t mRemainder = chainGroup % 2U;
+    uint8_t mRemainder = (uint8_t)(chainGroup % 2U);
 
     switch (chainGroup / 2U)
     {
@@ -424,7 +425,9 @@ uint32_t ADC_ETC_GetADCConversionValue(ADC_ETC_Type *base, uint32_t triggerGroup
             }
             break;
         default:
-            return 0U;
+            mADCResult = 0U;
+            assert(false);
+            break;
     }
     return mADCResult;
 }

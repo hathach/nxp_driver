@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015-2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2018 NXP
+ * Copyright 2016-2020 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -17,6 +17,15 @@
 
 #if defined(__ICCARM__)
 #include <stddef.h>
+#endif
+
+/*
+ * For CMSIS pack RTE.
+ * CMSIS pack RTE generates "RTC_Components.h" which contains the statements
+ * of the related <RTE_Components_h> element for all selected software components.
+ */
+#ifdef _RTE_
+#include "RTE_Components.h"
 #endif
 
 #include "fsl_device_registers.h"
@@ -38,8 +47,8 @@
 
 /*! @name Driver version */
 /*@{*/
-/*! @brief common driver version 2.2.0. */
-#define FSL_COMMON_DRIVER_VERSION (MAKE_VERSION(2, 2, 0))
+/*! @brief common driver version 2.2.4. */
+#define FSL_COMMON_DRIVER_VERSION (MAKE_VERSION(2, 2, 4))
 /*@}*/
 
 /* Debug console type definition. */
@@ -130,6 +139,9 @@ enum _status_groups
     kStatusGroup_SEMC = 100,                  /*!< Group number for SEMC status codes. */
     kStatusGroup_ApplicationRangeStart = 101, /*!< Starting number for application groups. */
     kStatusGroup_IAP = 102,                   /*!< Group number for IAP status codes */
+    kStatusGroup_SFA = 103,                   /*!< Group number for SFA status codes*/
+    kStatusGroup_SPC = 104,                   /*!< Group number for SPC status codes. */
+    kStatusGroup_PUF = 105,                   /*!< Group number for PUF status codes. */
 
     kStatusGroup_HAL_GPIO = 121,              /*!< Group number for HAL GPIO status codes. */
     kStatusGroup_HAL_UART = 122,              /*!< Group number for HAL UART status codes. */
@@ -155,18 +167,22 @@ enum _status_groups
     kStatusGroup_CODEC = 148,                 /*!< Group number for codec status codes. */
     kStatusGroup_ASRC = 149,                 /*!< Group number for codec status ASRC. */
     kStatusGroup_OTFAD = 150,                 /*!< Group number for codec status codes. */
+    kStatusGroup_SDIOSLV = 151,                 /*!< Group number for SDIOSLV status codes. */
+
 };
 
-/*! @brief Generic status return codes. */
+/*! \public
+ * @brief Generic status return codes.
+ */
 enum
 {
-    kStatus_Success = MAKE_STATUS(kStatusGroup_Generic, 0),
-    kStatus_Fail = MAKE_STATUS(kStatusGroup_Generic, 1),
-    kStatus_ReadOnly = MAKE_STATUS(kStatusGroup_Generic, 2),
-    kStatus_OutOfRange = MAKE_STATUS(kStatusGroup_Generic, 3),
-    kStatus_InvalidArgument = MAKE_STATUS(kStatusGroup_Generic, 4),
-    kStatus_Timeout = MAKE_STATUS(kStatusGroup_Generic, 5),
-    kStatus_NoTransferInProgress = MAKE_STATUS(kStatusGroup_Generic, 6),
+    kStatus_Success = MAKE_STATUS(kStatusGroup_Generic, 0),  /*!< Generic status for Success. */
+    kStatus_Fail = MAKE_STATUS(kStatusGroup_Generic, 1),      /*!< Generic status for Fail. */
+    kStatus_ReadOnly = MAKE_STATUS(kStatusGroup_Generic, 2),    /*!< Generic status for read only failure. */
+    kStatus_OutOfRange = MAKE_STATUS(kStatusGroup_Generic, 3),   /*!< Generic status for out of range access. */
+    kStatus_InvalidArgument = MAKE_STATUS(kStatusGroup_Generic, 4),   /*!< Generic status for invalid argument check. */
+    kStatus_Timeout = MAKE_STATUS(kStatusGroup_Generic, 5),   /*!< Generic status for timeout. */
+    kStatus_NoTransferInProgress = MAKE_STATUS(kStatusGroup_Generic, 6),   /*!< Generic status for no transfer in progress. */
 };
 
 /*! @brief Type used for all status and error return values. */
@@ -211,12 +227,29 @@ typedef int32_t status_t;
 /*! Macro to convert a microsecond period to raw count value */
 #define USEC_TO_COUNT(us, clockFreqInHz) (uint64_t)(((uint64_t)(us) * (clockFreqInHz)) / 1000000U)
 /*! Macro to convert a raw count value to microsecond */
-#define COUNT_TO_USEC(count, clockFreqInHz) (uint64_t)((uint64_t)count * 1000000U / clockFreqInHz)
+#define COUNT_TO_USEC(count, clockFreqInHz) (uint64_t)((uint64_t)(count) * 1000000U / (clockFreqInHz))
 
 /*! Macro to convert a millisecond period to raw count value */
-#define MSEC_TO_COUNT(ms, clockFreqInHz) (uint64_t)((uint64_t)ms * clockFreqInHz / 1000U)
+#define MSEC_TO_COUNT(ms, clockFreqInHz) (uint64_t)((uint64_t)(ms) * (clockFreqInHz) / 1000U)
 /*! Macro to convert a raw count value to millisecond */
-#define COUNT_TO_MSEC(count, clockFreqInHz) (uint64_t)((uint64_t)count * 1000U / clockFreqInHz)
+#define COUNT_TO_MSEC(count, clockFreqInHz) (uint64_t)((uint64_t)(count) * 1000U / (clockFreqInHz))
+/* @} */
+
+/*! @name ISR exit barrier
+ * @{
+ *
+ * ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
+ * exception return operation might vector to incorrect interrupt.
+ * For Cortex-M7, if core speed much faster than peripheral register write speed,
+ * the peripheral interrupt flags may be still set after exiting ISR, this results to
+ * the same error similar with errata 83869.
+ */
+#if (defined __CORTEX_M) && ((__CORTEX_M == 4U) || (__CORTEX_M == 7U))
+#define SDK_ISR_EXIT_BARRIER __DSB()
+#else
+#define SDK_ISR_EXIT_BARRIER
+#endif
+
 /* @} */
 
 /*! @name Alignment variable definition macros */
@@ -224,7 +257,7 @@ typedef int32_t status_t;
 #if (defined(__ICCARM__))
 /**
  * Workaround to disable MISRA C message suppress warnings for IAR compiler.
- * http://supp.iar.com/Support/?note=24725
+ * http:/ /supp.iar.com/Support/?note=24725
  */
 _Pragma("diag_suppress=Pm120")
 #define SDK_PRAGMA(x) _Pragma(#x)
@@ -274,7 +307,7 @@ _Pragma("diag_suppress=Pm120")
 
 /*! Macro to change a value to a given size aligned value */
 #define SDK_SIZEALIGN(var, alignbytes) \
-    ((unsigned int)((var) + ((alignbytes)-1)) & (unsigned int)(~(unsigned int)((alignbytes)-1)))
+    ((unsigned int)((var) + ((alignbytes)-1U)) & (unsigned int)(~(unsigned int)((alignbytes)-1U)))
 /* @} */
 
 /*! @name Non-cacheable region definition macros */
@@ -298,12 +331,18 @@ _Pragma("diag_suppress=Pm120")
 #endif
 #elif(defined(__CC_ARM) || defined(__ARMCC_VERSION))
 #if ((!(defined(FSL_FEATURE_HAS_NO_NONCACHEABLE_SECTION) && FSL_FEATURE_HAS_NO_NONCACHEABLE_SECTION)) && defined(FSL_FEATURE_L1ICACHE_LINESIZE_BYTE))
-#define AT_NONCACHEABLE_SECTION(var) __attribute__((section("NonCacheable"), zero_init)) var
-#define AT_NONCACHEABLE_SECTION_ALIGN(var, alignbytes) \
-    __attribute__((section("NonCacheable"), zero_init)) __attribute__((aligned(alignbytes))) var
 #define AT_NONCACHEABLE_SECTION_INIT(var) __attribute__((section("NonCacheable.init"))) var
 #define AT_NONCACHEABLE_SECTION_ALIGN_INIT(var, alignbytes) \
     __attribute__((section("NonCacheable.init"))) __attribute__((aligned(alignbytes))) var
+#if(defined(__CC_ARM))
+#define AT_NONCACHEABLE_SECTION(var) __attribute__((section("NonCacheable"), zero_init)) var
+#define AT_NONCACHEABLE_SECTION_ALIGN(var, alignbytes) \
+    __attribute__((section("NonCacheable"), zero_init)) __attribute__((aligned(alignbytes))) var
+#else
+#define AT_NONCACHEABLE_SECTION(var) __attribute__((section(".bss.NonCacheable"))) var
+#define AT_NONCACHEABLE_SECTION_ALIGN(var, alignbytes) \
+    __attribute__((section(".bss.NonCacheable"))) __attribute__((aligned(alignbytes))) var
+#endif
 #else
 #define AT_NONCACHEABLE_SECTION(var) var
 #define AT_NONCACHEABLE_SECTION_ALIGN(var, alignbytes) __attribute__((aligned(alignbytes))) var
@@ -393,13 +432,16 @@ _Pragma("diag_suppress=Pm120")
  case section which misses "break;"statement.
  */
 /* @{ */
-#if (defined(__GNUC__))
+#if defined(__GNUC__) && !defined(__ARMCC_VERSION)
 #define SUPPRESS_FALL_THROUGH_WARNING() __attribute__ ((fallthrough))
 #else
 #define SUPPRESS_FALL_THROUGH_WARNING()
-#endif /* defined(__GNUC__) */
+#endif
 /* @} */
 
+#if defined ( __ARMCC_VERSION ) && ( __ARMCC_VERSION >= 6010050 )
+void DefaultISR(void);
+#endif
 /*
  * The fsl_clock.h is included here because it needs MAKE_VERSION/MAKE_STATUS/status_t
  * defined in previous of this file.
@@ -447,7 +489,7 @@ _Pragma("diag_suppress=Pm120")
         }
 
 #if defined(FSL_FEATURE_NUMBER_OF_LEVEL1_INT_VECTORS) && (FSL_FEATURE_NUMBER_OF_LEVEL1_INT_VECTORS > 0)
-        if (interrupt >= FSL_FEATURE_NUMBER_OF_LEVEL1_INT_VECTORS)
+        if ((uint32_t)interrupt >= (uint32_t)FSL_FEATURE_NUMBER_OF_LEVEL1_INT_VECTORS)
         {
             return kStatus_Fail;
         }
@@ -485,7 +527,7 @@ _Pragma("diag_suppress=Pm120")
         }
 
 #if defined(FSL_FEATURE_NUMBER_OF_LEVEL1_INT_VECTORS) && (FSL_FEATURE_NUMBER_OF_LEVEL1_INT_VECTORS > 0)
-        if (interrupt >= FSL_FEATURE_NUMBER_OF_LEVEL1_INT_VECTORS)
+        if ((uint32_t)interrupt >= (uint32_t)FSL_FEATURE_NUMBER_OF_LEVEL1_INT_VECTORS)
         {
             return kStatus_Fail;
         }
@@ -562,7 +604,6 @@ _Pragma("diag_suppress=Pm120")
 #endif /* ENABLE_RAM_VECTOR_TABLE. */
 
 #if (defined(FSL_FEATURE_SOC_SYSCON_COUNT) && (FSL_FEATURE_SOC_SYSCON_COUNT > 0))
-#if !(defined(FSL_FEATURE_SYSCON_STARTER_DISCONTINUOUS) && FSL_FEATURE_SYSCON_STARTER_DISCONTINUOUS)
     /*!
      * @brief Enable specific interrupt for wake-up from deep-sleep mode.
      *
@@ -592,7 +633,6 @@ _Pragma("diag_suppress=Pm120")
      * @param interrupt The IRQ number.
      */
     void DisableDeepSleepIRQ(IRQn_Type interrupt);
-#endif /* FSL_FEATURE_SYSCON_STARTER_DISCONTINUOUS */
 #endif /* FSL_FEATURE_SOC_SYSCON_COUNT */
 
     /*!

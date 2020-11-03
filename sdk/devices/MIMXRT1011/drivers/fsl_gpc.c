@@ -30,15 +30,15 @@ void GPC_EnableIRQ(GPC_Type *base, uint32_t irqId)
 #if ((defined FSL_FEATURE_GPC_HAS_IRQ_0_31) && FSL_FEATURE_GPC_HAS_IRQ_0_31)
     if (irqRegNum == GPC_IMR_COUNT)
     {
-        base->IMR5 &= ~(1U << irqRegShiftNum);
+        base->IMR5 &= ~(1UL << irqRegShiftNum);
     }
     else
     {
-        base->IMR[irqRegNum] &= ~(1U << irqRegShiftNum);
+        base->IMR[irqRegNum] &= ~(1UL << irqRegShiftNum);
     }
 #else
     assert(irqRegNum > 0U);
-    base->IMR[irqRegNum - 1U] &= ~(1U << irqRegShiftNum);
+    base->IMR[irqRegNum - 1UL] &= ~(1UL << irqRegShiftNum);
 #endif /* FSL_FEATURE_GPC_HAS_IRQ_0_31 */
 }
 
@@ -58,15 +58,15 @@ void GPC_DisableIRQ(GPC_Type *base, uint32_t irqId)
 #if ((defined FSL_FEATURE_GPC_HAS_IRQ_0_31) && FSL_FEATURE_GPC_HAS_IRQ_0_31)
     if (irqRegNum == GPC_IMR_COUNT)
     {
-        base->IMR5 |= (1U << irqRegShiftNum);
+        base->IMR5 |= (1UL << irqRegShiftNum);
     }
     else
     {
-        base->IMR[irqRegNum] |= (1U << irqRegShiftNum);
+        base->IMR[irqRegNum] |= (1UL << irqRegShiftNum);
     }
 #else
     assert(irqRegNum > 0U);
-    base->IMR[irqRegNum - 1U] |= (1U << irqRegShiftNum);
+    base->IMR[irqRegNum - 1UL] |= (1UL << irqRegShiftNum);
 #endif /* FSL_FEATURE_GPC_HAS_IRQ_0_31 */
 }
 
@@ -88,16 +88,16 @@ bool GPC_GetIRQStatusFlag(GPC_Type *base, uint32_t irqId)
 #if ((defined FSL_FEATURE_GPC_HAS_IRQ_0_31) && FSL_FEATURE_GPC_HAS_IRQ_0_31)
     if (irqRegNum == GPC_IMR_COUNT)
     {
-        ret = base->ISR5 & (1U << irqRegShiftNum);
+        ret = base->ISR5 & (1UL << irqRegShiftNum);
     }
     else
     {
-        ret = base->ISR[irqRegNum] & (1U << irqRegShiftNum);
+        ret = base->ISR[irqRegNum] & (1UL << irqRegShiftNum);
     }
 #else
     assert(irqRegNum > 0U);
-    ret = base->ISR[irqRegNum - 1U] & (1U << irqRegShiftNum);
+    ret = base->ISR[irqRegNum - 1UL] & (1UL << irqRegShiftNum);
 #endif /* FSL_FEATURE_GPC_HAS_IRQ_0_31 */
 
-    return (1U << irqRegShiftNum) == ret;
+    return (1UL << irqRegShiftNum) == ret;
 }
