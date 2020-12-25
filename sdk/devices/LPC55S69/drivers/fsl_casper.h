@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 NXP
+ * Copyright 2018-2020 NXP
  * All rights reserved.
  *
  *
@@ -23,9 +23,9 @@
  */
 /*! @name Driver version */
 /*@{*/
-/*! @brief CASPER driver version. Version 2.0.2.
+/*! @brief CASPER driver version. Version 2.0.10.
  *
- * Current version: 2.0.2
+ * Current version: 2.0.10
  *
  * Change log:
  * - Version 2.0.0
@@ -33,9 +33,28 @@
  * - Version 2.0.1
  *   - Bug fix KPSDK-24531 double_scalar_multiplication() result may be all zeroes for some specific input
  * - Version 2.0.2
- *   - Bug fix KPSDK-25015 CASPER_MEMCPY hard-fault on LPC55xx when both source and destination buffers are outside of CASPER_RAM
+ *   - Bug fix KPSDK-25015 CASPER_MEMCPY hard-fault on LPC55xx when both source and destination buffers are outside of
+ * CASPER_RAM
+ * - Version 2.0.3
+ *   - Bug fix KPSDK-28107 RSUB, FILL and ZERO operations not implemented in enum _casper_operation.
+ * - Version 2.0.4
+ *   - For GCC compiler, enforce O1 optimize level, specifically to remove strict-aliasing option.
+ *     This driver is very specific and requires -fno-strict-aliasing.
+ * - Version 2.0.5
+ *   - Fix sign-compare warning.
+ * - Version 2.0.6
+ *   - Fix IAR Pa082 warning.
+ * - Version 2.0.7
+ *   - Fix MISRA-C 2012 issue.
+ * - Version 2.0.8
+ *   - Add feature macro for CASPER_RAM_OFFSET.
+ * - Version 2.0.9
+ *   - Remove unused function Jac_oncurve().
+ *   - Fix ECC384 build.
+ * - Version 2.0.10
+ *   - Fix MISRA-C 2012 issue.
  */
-#define FSL_CASPER_DRIVER_VERSION (MAKE_VERSION(2, 0, 2))
+#define FSL_CASPER_DRIVER_VERSION (MAKE_VERSION(2, 0, 10))
 /*@}*/
 
 /*! @brief CASPER operation
@@ -51,40 +70,43 @@ typedef enum _casper_operation
     kCASPER_OpMul6464Reduce =
         0x04,               /*! Walking 1 or more of J loop, doing c,r[-1]=r+a*b using 64x64=128, but skip 1st write*/
     kCASPER_OpAdd64 = 0x08, /*! Walking add with off_AB, and in/out off_RES doing c,r=r+a+c using 64+64=65*/
-    kCASPER_OpSub64 = 0x09, /*! Walking subtract with off_AB, and in/out off_RES doing r=r-a uding 64-64=64, with last
+    kCASPER_OpSub64 = 0x09, /*! Walking subtract with off_AB, and in/out off_RES doing r=r-a using 64-64=64, with last
                                borrow implicit if any*/
     kCASPER_OpDouble64 = 0x0A, /*! Walking add to self with off_RES doing c,r=r+r+c using 64+64=65*/
-    kCASPER_OpXor64 = 0x0B,    /*! Walking XOR with off_AB, and in/out off_RES doing r=r^a using 64^64=64*/
+    kCASPER_OpXor64    = 0x0B, /*! Walking XOR with off_AB, and in/out off_RES doing r=r^a using 64^64=64*/
+    kCASPER_OpRSub64   = 0x0C, /*! Walking subtract with off_AB, and in/out off_RES using r=a-r */
     kCASPER_OpShiftLeft32 =
         0x10, /*! Walking shift left doing r1,r=(b*D)|r1, where D is 2^amt and is loaded by app (off_CD not used)*/
     kCASPER_OpShiftRight32 = 0x11, /*! Walking shift right doing r,r1=(b*D)|r1, where D is 2^(32-amt) and is loaded by
                                       app (off_CD not used) and off_RES starts at MSW*/
-    kCASPER_OpCopy = 0x14,         /*! Copy from ABoff to resoff, 64b at a time*/
-    kCASPER_OpRemask = 0x15,       /*! Copy and mask from ABoff to resoff, 64b at a time*/
-    kCASPER_OpCompare = 0x16,      /*! Compare two arrays, running all the way to the end*/
-    kCASPER_OpCompareFast = 0x17,  /*! Compare two arrays, stopping on 1st !=*/
+    kCASPER_OpCopy        = 0x14,  /*! Copy from ABoff to resoff, 64b at a time*/
+    kCASPER_OpRemask      = 0x15,  /*! Copy and mask from ABoff to resoff, 64b at a time*/
+    kCASPER_OpFill        = 0x16,  /*! Fill RESOFF using 64 bits at a time with value in A and B */
+    kCASPER_OpZero        = 0x17,  /*! Fill RESOFF using 64 bits at a time of 0s */
+    kCASPER_OpCompare     = 0x18,  /*! Compare two arrays, running all the way to the end*/
+    kCASPER_OpCompareFast = 0x19,  /*! Compare two arrays, stopping on 1st !=*/
 } casper_operation_t;
 
-#define CASPER_CP 1
-#define CASPER_CP_CTRL0 (0x0 >> 2)
-#define CASPER_CP_CTRL1 (0x4 >> 2)
-#define CASPER_CP_LOADER (0x8 >> 2)
-#define CASPER_CP_STATUS (0xC >> 2)
+#define CASPER_CP          1
+#define CASPER_CP_CTRL0    (0x0 >> 2)
+#define CASPER_CP_CTRL1    (0x4 >> 2)
+#define CASPER_CP_LOADER   (0x8 >> 2)
+#define CASPER_CP_STATUS   (0xC >> 2)
 #define CASPER_CP_INTENSET (0x10 >> 2)
 #define CASPER_CP_INTENCLR (0x14 >> 2)
-#define CASPER_CP_INTSTAT (0x18 >> 2)
-#define CASPER_CP_AREG (0x20 >> 2)
-#define CASPER_CP_BREG (0x24 >> 2)
-#define CASPER_CP_CREG (0x28 >> 2)
-#define CASPER_CP_DREG (0x2C >> 2)
-#define CASPER_CP_RES0 (0x30 >> 2)
-#define CASPER_CP_RES1 (0x34 >> 2)
-#define CASPER_CP_RES2 (0x38 >> 2)
-#define CASPER_CP_RES3 (0x3C >> 2)
-#define CASPER_CP_MASK (0x60 >> 2)
-#define CASPER_CP_REMASK (0x64 >> 2)
-#define CASPER_CP_LOCK (0x80 >> 2)
-#define CASPER_CP_ID (0xFFC >> 2)
+#define CASPER_CP_INTSTAT  (0x18 >> 2)
+#define CASPER_CP_AREG     (0x20 >> 2)
+#define CASPER_CP_BREG     (0x24 >> 2)
+#define CASPER_CP_CREG     (0x28 >> 2)
+#define CASPER_CP_DREG     (0x2C >> 2)
+#define CASPER_CP_RES0     (0x30 >> 2)
+#define CASPER_CP_RES1     (0x34 >> 2)
+#define CASPER_CP_RES2     (0x38 >> 2)
+#define CASPER_CP_RES3     (0x3C >> 2)
+#define CASPER_CP_MASK     (0x60 >> 2)
+#define CASPER_CP_REMASK   (0x64 >> 2)
+#define CASPER_CP_LOCK     (0x80 >> 2)
+#define CASPER_CP_ID       (0xFFC >> 2)
 /* mcr (cp,  opc1, value, CRn, CRm, opc2) */
 #define CASPER_Wr32b(value, off) __arm_mcr(CASPER_CP, 0, value, ((off >> 4)), (off), 0)
 /* mcrr(coproc, opc1, value, CRm) */
@@ -97,28 +119,29 @@ typedef enum _casper_operation
 /*  it will be slower by a bit. */
 /*  The file is compiled with N_bitlen passed in as number of bits of the RSA key */
 /*  #define N_bitlen 2048 */
-#define N_wordlen_max (4096 / 32)
+#define N_wordlen_max (4096U / 32U)
 
+/* CASPER driver allows usage of 256 or 384 ECC, not both at once */
 #define CASPER_ECC_P256 1
 #define CASPER_ECC_P384 0
 
 #if CASPER_ECC_P256
-#define N_bitlen 256
+#define N_bitlen 256U
 #endif /* CASPER_ECC_P256 */
 
 #if CASPER_ECC_P384
-#define N_bitlen 384
+#define N_bitlen 384U
 #endif /* CASPER_ECC_P256 */
 
-#define NUM_LIMBS (N_bitlen / 32)
+#define NUM_LIMBS (N_bitlen / 32U)
 
 enum
 {
-    kCASPER_RamOffset_Result = 0x0u,
-    kCASPER_RamOffset_Base = (N_wordlen_max + 8u),
+    kCASPER_RamOffset_Result   = 0x0u,
+    kCASPER_RamOffset_Base     = (N_wordlen_max + 8u),
     kCASPER_RamOffset_TempBase = (2u * N_wordlen_max + 16u),
-    kCASPER_RamOffset_Modulus = (kCASPER_RamOffset_TempBase + N_wordlen_max + 4u),
-    kCASPER_RamOffset_M64 = 1022,
+    kCASPER_RamOffset_Modulus  = (kCASPER_RamOffset_TempBase + N_wordlen_max + 4u),
+    kCASPER_RamOffset_M64      = 1022U,
 };
 
 /*! @} */

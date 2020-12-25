@@ -24,7 +24,7 @@ typedef struct _usart_dma_private_handle
     usart_dma_handle_t *handle;
 } usart_dma_private_handle_t;
 
-enum _usart_transfer_states
+enum
 {
     kUSART_TxIdle, /* TX idle. */
     kUSART_TxBusy, /* TX busy. */
@@ -41,17 +41,22 @@ static usart_dma_private_handle_t s_dmaPrivateHandle[FSL_FEATURE_SOC_USART_COUNT
 
 static void USART_TransferSendDMACallback(dma_handle_t *handle, void *param, bool transferDone, uint32_t intmode)
 {
-    assert(handle);
-    assert(param);
+    assert(handle != NULL);
+    assert(param != NULL);
 
     usart_dma_private_handle_t *usartPrivateHandle = (usart_dma_private_handle_t *)param;
 
     /* Disable UART TX DMA. */
     USART_EnableTxDMA(usartPrivateHandle->base, false);
 
-    usartPrivateHandle->handle->txState = kUSART_TxIdle;
+    usartPrivateHandle->handle->txState = (uint8_t)kUSART_TxIdle;
 
-    if (usartPrivateHandle->handle->callback)
+    /* Wait to finish transfer */
+    while (0U == (usartPrivateHandle->base->STAT & USART_STAT_TXIDLE_MASK))
+    {
+    }
+
+    if (usartPrivateHandle->handle->callback != NULL)
     {
         usartPrivateHandle->handle->callback(usartPrivateHandle->base, usartPrivateHandle->handle, kStatus_USART_TxIdle,
                                              usartPrivateHandle->handle->userData);
@@ -60,17 +65,17 @@ static void USART_TransferSendDMACallback(dma_handle_t *handle, void *param, boo
 
 static void USART_TransferReceiveDMACallback(dma_handle_t *handle, void *param, bool transferDone, uint32_t intmode)
 {
-    assert(handle);
-    assert(param);
+    assert(handle != NULL);
+    assert(param != NULL);
 
     usart_dma_private_handle_t *usartPrivateHandle = (usart_dma_private_handle_t *)param;
 
     /* Disable UART RX DMA. */
     USART_EnableRxDMA(usartPrivateHandle->base, false);
 
-    usartPrivateHandle->handle->rxState = kUSART_RxIdle;
+    usartPrivateHandle->handle->rxState = (uint8_t)kUSART_RxIdle;
 
-    if (usartPrivateHandle->handle->callback)
+    if (usartPrivateHandle->handle->callback != NULL)
     {
         usartPrivateHandle->handle->callback(usartPrivateHandle->base, usartPrivateHandle->handle, kStatus_USART_RxIdle,
                                              usartPrivateHandle->handle->userData);
@@ -93,7 +98,7 @@ status_t USART_TransferCreateHandleDMA(USART_Type *base,
                                        dma_handle_t *txDmaHandle,
                                        dma_handle_t *rxDmaHandle)
 {
-    int32_t instance = 0;
+    uint32_t instance = 0;
 
     /* check 'base' */
     assert(!(NULL == base));
@@ -110,14 +115,14 @@ status_t USART_TransferCreateHandleDMA(USART_Type *base,
 
     instance = USART_GetInstance(base);
 
-    memset(handle, 0, sizeof(*handle));
+    (void)memset(handle, 0, sizeof(*handle));
     /* assign 'base' and 'handle' */
     s_dmaPrivateHandle[instance].base   = base;
     s_dmaPrivateHandle[instance].handle = handle;
 
     /* set tx/rx 'idle' state */
-    handle->rxState = kUSART_RxIdle;
-    handle->txState = kUSART_TxIdle;
+    handle->rxState = (uint8_t)kUSART_RxIdle;
+    handle->txState = (uint8_t)kUSART_TxIdle;
 
     handle->callback = callback;
     handle->userData = userData;
@@ -126,13 +131,13 @@ status_t USART_TransferCreateHandleDMA(USART_Type *base,
     handle->txDmaHandle = txDmaHandle;
 
     /* Configure TX. */
-    if (txDmaHandle)
+    if (txDmaHandle != NULL)
     {
         DMA_SetCallback(txDmaHandle, USART_TransferSendDMACallback, &s_dmaPrivateHandle[instance]);
     }
 
     /* Configure RX. */
-    if (rxDmaHandle)
+    if (rxDmaHandle != NULL)
     {
         DMA_SetCallback(rxDmaHandle, USART_TransferReceiveDMACallback, &s_dmaPrivateHandle[instance]);
     }
@@ -155,34 +160,35 @@ status_t USART_TransferCreateHandleDMA(USART_Type *base,
  */
 status_t USART_TransferSendDMA(USART_Type *base, usart_dma_handle_t *handle, usart_transfer_t *xfer)
 {
-    assert(handle);
-    assert(handle->txDmaHandle);
-    assert(xfer);
-    assert(xfer->data);
-    assert(xfer->dataSize);
+    assert(handle != NULL);
+    assert(handle->txDmaHandle != NULL);
+    assert(xfer != NULL);
+    assert(xfer->data != NULL);
+    assert(xfer->dataSize != 0U);
 
     dma_transfer_config_t xferConfig;
     status_t status;
+    uint32_t address = (uint32_t)&base->FIFOWR;
 
     /* If previous TX not finished. */
-    if (kUSART_TxBusy == handle->txState)
+    if ((uint8_t)kUSART_TxBusy == handle->txState)
     {
         status = kStatus_USART_TxBusy;
     }
     else
     {
-        handle->txState       = kUSART_TxBusy;
+        handle->txState       = (uint8_t)kUSART_TxBusy;
         handle->txDataSizeAll = xfer->dataSize;
 
         /* Enable DMA request from txFIFO */
         USART_EnableTxDMA(base, true);
 
         /* Prepare transfer. */
-        DMA_PrepareTransfer(&xferConfig, xfer->data, ((void *)((uint32_t)&base->FIFOWR)), sizeof(uint8_t),
-                            xfer->dataSize, kDMA_MemoryToPeripheral, NULL);
+        DMA_PrepareTransfer(&xferConfig, xfer->data, (uint32_t *)address, sizeof(uint8_t), xfer->dataSize,
+                            kDMA_MemoryToPeripheral, NULL);
 
         /* Submit transfer. */
-        DMA_SubmitTransfer(handle->txDmaHandle, &xferConfig);
+        (void)DMA_SubmitTransfer(handle->txDmaHandle, &xferConfig);
         DMA_StartTransfer(handle->txDmaHandle);
 
         status = kStatus_Success;
@@ -206,34 +212,35 @@ status_t USART_TransferSendDMA(USART_Type *base, usart_dma_handle_t *handle, usa
  */
 status_t USART_TransferReceiveDMA(USART_Type *base, usart_dma_handle_t *handle, usart_transfer_t *xfer)
 {
-    assert(handle);
-    assert(handle->rxDmaHandle);
-    assert(xfer);
-    assert(xfer->data);
-    assert(xfer->dataSize);
+    assert(handle != NULL);
+    assert(handle->rxDmaHandle != NULL);
+    assert(xfer != NULL);
+    assert(xfer->data != NULL);
+    assert(xfer->dataSize != 0U);
 
     dma_transfer_config_t xferConfig;
     status_t status;
+    uint32_t address = (uint32_t)&base->FIFORD;
 
     /* If previous RX not finished. */
-    if (kUSART_RxBusy == handle->rxState)
+    if ((uint8_t)kUSART_RxBusy == handle->rxState)
     {
         status = kStatus_USART_RxBusy;
     }
     else
     {
-        handle->rxState       = kUSART_RxBusy;
+        handle->rxState       = (uint8_t)kUSART_RxBusy;
         handle->rxDataSizeAll = xfer->dataSize;
 
         /* Enable DMA request from rxFIFO */
         USART_EnableRxDMA(base, true);
 
         /* Prepare transfer. */
-        DMA_PrepareTransfer(&xferConfig, ((void *)((uint32_t)&base->FIFORD)), xfer->data, sizeof(uint8_t),
-                            xfer->dataSize, kDMA_PeripheralToMemory, NULL);
+        DMA_PrepareTransfer(&xferConfig, (uint32_t *)address, xfer->data, sizeof(uint8_t), xfer->dataSize,
+                            kDMA_PeripheralToMemory, NULL);
 
         /* Submit transfer. */
-        DMA_SubmitTransfer(handle->rxDmaHandle, &xferConfig);
+        (void)DMA_SubmitTransfer(handle->rxDmaHandle, &xferConfig);
         DMA_StartTransfer(handle->rxDmaHandle);
 
         status = kStatus_Success;
@@ -257,7 +264,7 @@ void USART_TransferAbortSendDMA(USART_Type *base, usart_dma_handle_t *handle)
 
     /* Stop transfer. */
     DMA_AbortTransfer(handle->txDmaHandle);
-    handle->txState = kUSART_TxIdle;
+    handle->txState = (uint8_t)kUSART_TxIdle;
 }
 
 /*!
@@ -275,7 +282,7 @@ void USART_TransferAbortReceiveDMA(USART_Type *base, usart_dma_handle_t *handle)
 
     /* Stop transfer. */
     DMA_AbortTransfer(handle->rxDmaHandle);
-    handle->rxState = kUSART_RxIdle;
+    handle->rxState = (uint8_t)kUSART_RxIdle;
 }
 
 /*!
@@ -292,11 +299,11 @@ void USART_TransferAbortReceiveDMA(USART_Type *base, usart_dma_handle_t *handle)
  */
 status_t USART_TransferGetReceiveCountDMA(USART_Type *base, usart_dma_handle_t *handle, uint32_t *count)
 {
-    assert(handle);
-    assert(handle->rxDmaHandle);
-    assert(count);
+    assert(NULL != handle);
+    assert(NULL != handle->rxDmaHandle);
+    assert(NULL != count);
 
-    if (kUSART_RxIdle == handle->rxState)
+    if ((uint8_t)kUSART_RxIdle == handle->rxState)
     {
         return kStatus_NoTransferInProgress;
     }

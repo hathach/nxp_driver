@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 NXP
+ * Copyright 2018-2020 NXP
  * All rights reserved.
  *
  *
@@ -13,6 +13,44 @@
 #include <stdint.h>
 
 #include "fsl_common.h"
+
+/*******************************************************************************
+ * Definitions
+ *******************************************************************************/
+
+/*!
+ * @addtogroup puf_driver
+ * @{
+ */
+/*! @name Driver version */
+/*@{*/
+/*! @brief PUF driver version. Version 2.1.3.
+ *
+ * Current version: 2.1.3
+ *
+ * Change log:
+ * - 2.0.0
+ *   - Initial version.
+ * - 2.0.1
+ *   - Fixed puf_wait_usec function optimization issue.
+ * - 2.0.2
+ *   - Add PUF configuration structure and support for PUF SRAM controller.
+ *     Remove magic constants.
+ * - 2.0.3
+ *   - Fix MISRA C-2012 issue.
+ * - 2.1.0
+ *   - Align driver with PUF SRAM controller registers on LPCXpresso55s16.
+ *   - Update initizalition logic .
+ * - 2.1.1
+ *   - Fix ARMGCC build warning .
+ * - 2.1.2
+ *   - Update: Add automatic big to little endian swap for user
+ *     (pre-shared) keys destinated to secret hardware bus (PUF key index 0).
+ * - 2.1.3
+ *   - Fix MISRA C-2012 issue.
+ */
+#define FSL_PUF_DRIVER_VERSION (MAKE_VERSION(2, 1, 3))
+/*@}*/
 
 typedef enum _puf_key_index_register
 {
@@ -41,6 +79,7 @@ typedef enum _puf_min_max
     kPUF_KeyIndexMax = kPUF_KeyIndex_15,
 } puf_min_max_t;
 
+/*! @brief PUF key slot. */
 typedef enum _puf_key_slot
 {
     kPUF_KeySlot0 = 0U, /*!< PUF key slot 0 */
@@ -51,10 +90,30 @@ typedef enum _puf_key_slot
 #endif
 } puf_key_slot_t;
 
+typedef struct
+{
+    uint32_t dischargeTimeMsec;
+    uint32_t coreClockFrequencyHz;
+#if defined(FSL_FEATURE_PUF_HAS_SRAM_CTRL) && (FSL_FEATURE_PUF_HAS_SRAM_CTRL > 0)
+    /* LPCXpresso55s16 */
+    PUF_SRAM_CTRL_Type *puf_sram_base;
+    uint8_t CKGATING;
+#endif /* FSL_FEATURE_PUF_HAS_SRAM_CTRL */
+} puf_config_t;
 /*! @brief Get Key Code size in bytes from key size in bytes at compile time. */
-#define PUF_GET_KEY_CODE_SIZE_FOR_KEY_SIZE(x) ((160u + ((((x << 3) + 255u) >> 8) << 8)) >> 3)
-#define PUF_MIN_KEY_CODE_SIZE PUF_GET_KEY_CODE_SIZE_FOR_KEY_SIZE(8)
-#define PUF_ACTIVATION_CODE_SIZE 1192
+#define PUF_GET_KEY_CODE_SIZE_FOR_KEY_SIZE(x) ((160u + (((((x) << 3) + 255u) >> 8) << 8)) >> 3)
+#define PUF_MIN_KEY_CODE_SIZE                 PUF_GET_KEY_CODE_SIZE_FOR_KEY_SIZE(8UL)
+#define PUF_ACTIVATION_CODE_SIZE              1192U
+#define KEYSTORE_PUF_DISCHARGE_TIME_MAX_MS    400
+
+/*! PUF status return codes. */
+enum
+{
+    kStatus_EnrollNotAllowed = MAKE_STATUS(kStatusGroup_PUF, 1),
+    kStatus_StartNotAllowed  = MAKE_STATUS(kStatusGroup_PUF, 2)
+};
+
+/*! @} */
 /*******************************************************************************
  * API
  *******************************************************************************/
@@ -64,16 +123,24 @@ extern "C" {
 #endif /* __cplusplus */
 
 /*!
+ * @brief Sets the default configuration of PUF
+ *
+ * This function initialize PUF config structure to default values.
+ *
+ * @param conf PUF configuration structure
+ */
+void PUF_GetDefaultConfig(puf_config_t *conf);
+
+/*!
  * @brief Initialize PUF
  *
  * This function enables power to PUF block and waits until the block initializes.
  *
  * @param base PUF peripheral base address
- * @param dischargeTimeMsec time in ms to wait for PUF SRAM to fully discharge
- * @param coreClockFrequencyHz core clock frequency in Hz
+ * @param conf PUF configuration structure
  * @return Status of the init operation
  */
-status_t PUF_Init(PUF_Type *base, uint32_t dischargeTimeMsec, uint32_t coreClockFrequencyHz);
+status_t PUF_Init(PUF_Type *base, puf_config_t *conf);
 
 /*!
  * @brief Denitialize PUF
@@ -81,10 +148,9 @@ status_t PUF_Init(PUF_Type *base, uint32_t dischargeTimeMsec, uint32_t coreClock
  * This function disables power to PUF SRAM and peripheral clock.
  *
  * @param base PUF peripheral base address
- * @param dischargeTimeMsec time in ms to wait for PUF SRAM to fully discharge
- * @param coreClockFrequencyHz core clock frequency in Hz
+ * @param conf PUF configuration structure
  */
-void PUF_Deinit(PUF_Type *base, uint32_t dischargeTimeMsec, uint32_t coreClockFrequencyHz);
+void PUF_Deinit(PUF_Type *base, puf_config_t *conf);
 
 /*!
  * @brief Enroll PUF
@@ -223,6 +289,17 @@ static inline void PUF_BlockEnroll(PUF_Type *base)
 {
     base->CFG |= PUF_CFG_BLOCKENROLL_SETKEY_MASK; /* block enroll */
 }
+
+/*!
+ * @brief Powercycle PUF
+ *
+ * This function make powercycle.
+ *
+ * @param base PUF peripheral base address
+ * @param conf PUF configuration structure
+ * @return Status of the powercycle operation.
+ */
+status_t PUF_PowerCycle(PUF_Type *base, puf_config_t *conf);
 
 #if defined(__cplusplus)
 }
