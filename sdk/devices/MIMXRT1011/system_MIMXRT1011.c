@@ -9,9 +9,9 @@
 **                          Keil ARM C/C++ Compiler
 **                          MCUXpresso Compiler
 **
-**     Reference manual:    IMXRT1010RM Rev.0, 09/2019
-**     Version:             rev. 1.1, 2019-08-06
-**     Build:               b191119
+**     Reference manual:    IMXRT1010RM Rev.1, 10/2021 | IMXRT1010SRM Rev.0
+**     Version:             rev. 1.2, 2021-08-10
+**     Build:               b210810
 **
 **     Abstract:
 **         Provides a system configuration function and a global variable that
@@ -19,7 +19,7 @@
 **         the oscillator (PLL) that is part of the microcontroller device.
 **
 **     Copyright 2016 Freescale Semiconductor, Inc.
-**     Copyright 2016-2019 NXP
+**     Copyright 2016-2021 NXP
 **     All rights reserved.
 **
 **     SPDX-License-Identifier: BSD-3-Clause
@@ -34,14 +34,16 @@
 **         Rev.0 Header GA
 **     - rev. 1.1 (2019-08-06)
 **         Update header files to align with IMXRT1010RM Rev.B.
+**     - rev. 1.2 (2021-08-10)
+**         Update header files to align with IMXRT1010RM Rev.1.
 **
 ** ###################################################################
 */
 
 /*!
  * @file MIMXRT1011
- * @version 1.1
- * @date 2019-08-06
+ * @version 1.2
+ * @date 2021-08-10
  * @brief Device specific configuration file for MIMXRT1011 (implementation file)
  *
  * Provides a system configuration function and a global variable that contains
@@ -66,10 +68,7 @@ uint32_t SystemCoreClock = DEFAULT_SYSTEM_CLOCK;
 
 void SystemInit (void) {
 #if ((__FPU_PRESENT == 1) && (__FPU_USED == 1))
-  SCB->CPACR |= ((3UL << 10*2) | (3UL << 11*2));    /* set CP10, CP11 Full Access in Secure mode */
-  #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
-  SCB_NS->CPACR |= ((3UL << 10*2) | (3UL << 11*2));    /* set CP10, CP11 Full Access in Non-secure mode */
-  #endif /* (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) */
+  SCB->CPACR |= ((3UL << 10*2) | (3UL << 11*2));    /* set CP10, CP11 Full Access */
 #endif /* ((__FPU_PRESENT == 1) && (__FPU_USED == 1)) */
 
 #if defined(__MCUXPRESSO)
@@ -78,21 +77,29 @@ void SystemInit (void) {
 #endif
 
 /* Disable Watchdog Power Down Counter */
-WDOG1->WMCR &= ~WDOG_WMCR_PDE_MASK;
-WDOG2->WMCR &= ~WDOG_WMCR_PDE_MASK;
+    WDOG1->WMCR &= ~(uint16_t) WDOG_WMCR_PDE_MASK;
+    WDOG2->WMCR &= ~(uint16_t) WDOG_WMCR_PDE_MASK;
 
 /* Watchdog disable */
 
 #if (DISABLE_WDOG)
     if ((WDOG1->WCR & WDOG_WCR_WDE_MASK) != 0U)
     {
-        WDOG1->WCR &= ~WDOG_WCR_WDE_MASK;
+        WDOG1->WCR &= ~(uint16_t) WDOG_WCR_WDE_MASK;
     }
     if ((WDOG2->WCR & WDOG_WCR_WDE_MASK) != 0U)
     {
-        WDOG2->WCR &= ~WDOG_WCR_WDE_MASK;
+        WDOG2->WCR &= ~(uint16_t) WDOG_WCR_WDE_MASK;
     }
-    RTWDOG->CNT = 0xD928C520U; /* 0xD928C520U is the update key */
+    if ((RTWDOG->CS & RTWDOG_CS_CMD32EN_MASK) != 0U)
+    {
+        RTWDOG->CNT = 0xD928C520U; /* 0xD928C520U is the update key */
+    }
+    else
+    {
+        RTWDOG->CNT = 0xC520U;
+        RTWDOG->CNT = 0xD928U;
+    }
     RTWDOG->TOVAL = 0xFFFF;
     RTWDOG->CS = (uint32_t) ((RTWDOG->CS) & ~RTWDOG_CS_EN_MASK) | RTWDOG_CS_UPDATE_MASK;
 #endif /* (DISABLE_WDOG) */
@@ -107,11 +114,6 @@ WDOG2->WMCR &= ~WDOG_WMCR_PDE_MASK;
 #if defined(__ICACHE_PRESENT) && __ICACHE_PRESENT
     if (SCB_CCR_IC_Msk != (SCB_CCR_IC_Msk & SCB->CCR)) {
         SCB_EnableICache();
-    }
-#endif
-#if defined(__DCACHE_PRESENT) && __DCACHE_PRESENT
-    if (SCB_CCR_DC_Msk != (SCB_CCR_DC_Msk & SCB->CCR)) {
-        SCB_EnableDCache();
     }
 #endif
 
@@ -146,7 +148,7 @@ void SystemCoreClockUpdate (void) {
     }
     else
     {
-        PLL3MainClock = (CPU_XTAL_CLK_HZ * ((CCM_ANALOG->PLL_USB1 & CCM_ANALOG_PLL_USB1_DIV_SELECT_MASK) ? 22U : 20U));
+        PLL3MainClock = (CPU_XTAL_CLK_HZ * (((CCM_ANALOG->PLL_USB1 & CCM_ANALOG_PLL_USB1_DIV_SELECT_MASK) != 0U) ? 22U : 20U));
     }
 
     /* Periph_clk2_clk ---> Periph_clk */

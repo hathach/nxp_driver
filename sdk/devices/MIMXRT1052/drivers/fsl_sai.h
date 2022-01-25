@@ -12,7 +12,7 @@
 #include "fsl_common.h"
 
 /*!
- * @addtogroup sai_driver
+ * @addtogroup sai_driver SAI Driver
  * @{
  */
 
@@ -22,7 +22,7 @@
 
 /*! @name Driver version */
 /*@{*/
-#define FSL_SAI_DRIVER_VERSION (MAKE_VERSION(2, 3, 1)) /*!< Version 2.3.1 */
+#define FSL_SAI_DRIVER_VERSION (MAKE_VERSION(2, 3, 4)) /*!< Version 2.3.4 */
 /*@}*/
 
 /*! @brief _sai_status_t, SAI return status.*/
@@ -241,7 +241,7 @@ typedef enum _sai_data_pin_state
 } sai_data_pin_state_t;
 #endif
 
-#if defined(FSL_FEATURE_SAI_HAS_FIFO_FUNCTION_COMBINE) && FSL_FEATURE_SAI_HAS_FIFO_FUNCTION_COMBINE
+#if defined(FSL_FEATURE_SAI_HAS_FIFO_COMBINE_MODE) && FSL_FEATURE_SAI_HAS_FIFO_COMBINE_MODE
 /*! @brief sai fifo combine mode definition */
 typedef enum _sai_fifo_combine
 {
@@ -318,7 +318,7 @@ typedef struct _sai_master_clock
 
 /*! @brief sai fifo feature*/
 #if (defined(FSL_FEATURE_SAI_HAS_FIFO_FUNCTION_AFTER_ERROR) && FSL_FEATURE_SAI_HAS_FIFO_FUNCTION_AFTER_ERROR) || \
-    (defined(FSL_FEATURE_SAI_HAS_FIFO_FUNCTION_COMBINE) && FSL_FEATURE_SAI_HAS_FIFO_FUNCTION_COMBINE) ||         \
+    (defined(FSL_FEATURE_SAI_HAS_FIFO_COMBINE_MODE) && FSL_FEATURE_SAI_HAS_FIFO_COMBINE_MODE) ||                 \
     (defined(FSL_FEATURE_SAI_HAS_FIFO_PACKING) && FSL_FEATURE_SAI_HAS_FIFO_PACKING) ||                           \
     (defined(FSL_FEATURE_SAI_FIFO_COUNT) && (FSL_FEATURE_SAI_FIFO_COUNT > 1))
 #define FSL_SAI_HAS_FIFO_EXTEND_FEATURE 1
@@ -334,7 +334,7 @@ typedef struct _sai_fifo
     bool fifoContinueOneError; /*!< fifo continues when error occur */
 #endif
 
-#if defined(FSL_FEATURE_SAI_HAS_FIFO_FUNCTION_COMBINE) && FSL_FEATURE_SAI_HAS_FIFO_FUNCTION_COMBINE
+#if defined(FSL_FEATURE_SAI_HAS_FIFO_COMBINE_MODE) && FSL_FEATURE_SAI_HAS_FIFO_COMBINE_MODE
     sai_fifo_combine_t fifoCombine; /*!< fifo combine mode */
 #endif
 
@@ -848,6 +848,20 @@ void SAI_GetTDMConfig(sai_transceiver_t *config,
 
 /*!
  * @brief Get DSP mode configurations.
+ *
+ * @note DSP mode is also called PCM mode which support MODE A and MODE B,
+ * DSP/PCM MODE A configuration flow. RX is similiar but uses SAI_RxSetConfig instead of SAI_TxSetConfig:
+ * @code
+ * SAI_GetDSPConfig(config, kSAI_FrameSyncLenOneBitClk, bitWidth, kSAI_Stereo, channelMask)
+ * config->frameSync.frameSyncEarly    = true;
+ * SAI_TxSetConfig(base, config)
+ * @endcode
+ *
+ * DSP/PCM MODE B configuration flow for TX. RX is similiar but uses SAI_RxSetConfig instead of SAI_TxSetConfig:
+ * @code
+ * SAI_GetDSPConfig(config, kSAI_FrameSyncLenOneBitClk, bitWidth, kSAI_Stereo, channelMask)
+ * SAI_TxSetConfig(base, config)
+ * @endcode
  *
  * @param config transceiver configurations.
  * @param frameSyncWidth length of frame sync.

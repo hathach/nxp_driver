@@ -11,9 +11,9 @@
 **                          Keil ARM C/C++ Compiler
 **                          MCUXpresso Compiler
 **
-**     Reference manual:    IMXRT1020RM Rev.1, 12/2018 | IMXRT1020SRM Rev.3
-**     Version:             rev. 1.1, 2019-04-29
-**     Build:               b191113
+**     Reference manual:    IMXRT1020RM Rev.2, 01/2021 | IMXRT102XSRM Rev.0
+**     Version:             rev. 1.2, 2021-08-10
+**     Build:               b210811
 **
 **     Abstract:
 **         Provides a system configuration function and a global variable that
@@ -21,7 +21,7 @@
 **         the oscillator (PLL) that is part of the microcontroller device.
 **
 **     Copyright 2016 Freescale Semiconductor, Inc.
-**     Copyright 2016-2019 NXP
+**     Copyright 2016-2021 NXP
 **     All rights reserved.
 **
 **     SPDX-License-Identifier: BSD-3-Clause
@@ -36,14 +36,16 @@
 **         Update header files to align with IMXRT1020RM Rev.1.
 **     - rev. 1.1 (2019-04-29)
 **         Add SET/CLR/TOG register group to register CTRL, STAT, CHANNELCTRL, CH0STAT, CH0OPTS, CH1STAT, CH1OPTS, CH2STAT, CH2OPTS, CH3STAT, CH3OPTS of DCP module.
+**     - rev. 1.2 (2021-08-10)
+**         Update header files to align with IMXRT1020RM Rev.2.
 **
 ** ###################################################################
 */
 
 /*!
  * @file MIMXRT1021
- * @version 1.1
- * @date 2019-04-29
+ * @version 1.2
+ * @date 2021-08-10
  * @brief Device specific configuration file for MIMXRT1021 (implementation file)
  *
  * Provides a system configuration function and a global variable that contains
@@ -77,19 +79,19 @@ void SystemInit (void) {
 #endif
 
 /* Disable Watchdog Power Down Counter */
-WDOG1->WMCR &= ~WDOG_WMCR_PDE_MASK;
-WDOG2->WMCR &= ~WDOG_WMCR_PDE_MASK;
+    WDOG1->WMCR &= ~(uint16_t) WDOG_WMCR_PDE_MASK;
+    WDOG2->WMCR &= ~(uint16_t) WDOG_WMCR_PDE_MASK;
 
 /* Watchdog disable */
 
 #if (DISABLE_WDOG)
     if ((WDOG1->WCR & WDOG_WCR_WDE_MASK) != 0U)
     {
-        WDOG1->WCR &= ~WDOG_WCR_WDE_MASK;
+        WDOG1->WCR &= ~(uint16_t) WDOG_WCR_WDE_MASK;
     }
     if ((WDOG2->WCR & WDOG_WCR_WDE_MASK) != 0U)
     {
-        WDOG2->WCR &= ~WDOG_WCR_WDE_MASK;
+        WDOG2->WCR &= ~(uint16_t) WDOG_WCR_WDE_MASK;
     }
     if ((RTWDOG->CS & RTWDOG_CS_CMD32EN_MASK) != 0U)
     {
@@ -114,11 +116,6 @@ WDOG2->WMCR &= ~WDOG_WMCR_PDE_MASK;
 #if defined(__ICACHE_PRESENT) && __ICACHE_PRESENT
     if (SCB_CCR_IC_Msk != (SCB_CCR_IC_Msk & SCB->CCR)) {
         SCB_EnableICache();
-    }
-#endif
-#if defined(__DCACHE_PRESENT) && __DCACHE_PRESENT
-    if (SCB_CCR_DC_Msk != (SCB_CCR_DC_Msk & SCB->CCR)) {
-        SCB_EnableDCache();
     }
 #endif
 
@@ -153,7 +150,7 @@ void SystemCoreClockUpdate (void) {
     }
     else
     {
-        PLL3MainClock = (CPU_XTAL_CLK_HZ * ((CCM_ANALOG->PLL_USB1 & CCM_ANALOG_PLL_USB1_DIV_SELECT_MASK) ? 22U : 20U));
+        PLL3MainClock = (CPU_XTAL_CLK_HZ * (((CCM_ANALOG->PLL_USB1 & CCM_ANALOG_PLL_USB1_DIV_SELECT_MASK) != 0U) ? 22U : 20U));
     }
 
     /* Periph_clk2_clk ---> Periph_clk */
