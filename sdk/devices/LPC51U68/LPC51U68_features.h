@@ -1,13 +1,13 @@
 /*
 ** ###################################################################
 **     Version:             rev. 1.0, 2017-12-15
-**     Build:               b190225
+**     Build:               b220714
 **
 **     Abstract:
 **         Chip specific module features.
 **
 **     Copyright 2016 Freescale Semiconductor, Inc.
-**     Copyright 2016-2019 NXP
+**     Copyright 2016-2022 NXP
 **     All rights reserved.
 **
 **     SPDX-License-Identifier: BSD-3-Clause
@@ -92,10 +92,25 @@
 #define FSL_FEATURE_ADC_HAS_CTRL_CALMODE (0)
 /* @brief Has startup register. */
 #define FSL_FEATURE_ADC_HAS_STARTUP_REG (1)
-/* @brief Has ADTrim register */
+/* @brief Has ADC Trim register */
 #define FSL_FEATURE_ADC_HAS_TRIM_REG (0)
 /* @brief Has Calibration register. */
 #define FSL_FEATURE_ADC_HAS_CALIB_REG (1)
+
+/* CTIMER module features */
+
+/* @brief CTIMER has no capture channel. */
+#define FSL_FEATURE_CTIMER_HAS_NO_INPUT_CAPTURE (0)
+/* @brief CTIMER has no capture 2 interrupt. */
+#define FSL_FEATURE_CTIMER_HAS_NO_IR_CR2INT (0)
+/* @brief CTIMER capture 3 interrupt. */
+#define FSL_FEATURE_CTIMER_HAS_IR_CR3INT (1)
+/* @brief Has CTIMER CCR_CAP2 (register bits CCR[CAP2RE][CAP2FE][CAP2I]. */
+#define FSL_FEATURE_CTIMER_HAS_NO_CCR_CAP2 (0)
+/* @brief Has CTIMER CCR_CAP3 (register bits CCR[CAP3RE][CAP3FE][CAP3I]). */
+#define FSL_FEATURE_CTIMER_HAS_CCR_CAP3 (1)
+/* @brief CTIMER Has register MSR */
+#define FSL_FEATURE_CTIMER_HAS_MSR (0)
 
 /* DMA module features */
 
@@ -165,10 +180,15 @@
 
 /* I2S module features */
 
-/* @brief I2S support dual channel transfer */
+/* @brief I2S support dual channel transfer. */
 #define FSL_FEATURE_I2S_SUPPORT_SECONDARY_CHANNEL (0)
 /* @brief I2S has DMIC interconnection */
-#define FSL_FEATURE_FLEXCOMM_I2S_HAS_DMIC_INTERCONNECTION  (0)
+#define FSL_FEATURE_FLEXCOMM_I2S_HAS_DMIC_INTERCONNECTION (0)
+
+/* IOCON module features */
+
+/* @brief Func bit field width */
+#define FSL_FEATURE_IOCON_FUNC_FIELD_WIDTH (3)
 
 /* MRT module features */
 
@@ -203,10 +223,17 @@
 /* @brief Number of outputs */
 #define FSL_FEATURE_SCT_NUMBER_OF_OUTPUTS (8)
 
+/* SPI module features */
+
+/* @brief SSEL pin count. */
+#define FSL_FEATURE_SPI_SSEL_COUNT (4)
+
 /* SYSCON module features */
 
 /* @brief Pointer to ROM IAP entry functions */
 #define FSL_FEATURE_SYSCON_IAP_ENTRY_LOCATION (0x03000205)
+/* @brief IAP Reinvoke ISP command parameter is pointer */
+#define FSL_FEATURE_SYSCON_IAP_REINVOKE_ISP_PARAM_POINTER (0)
 /* @brief Flash page size in bytes */
 #define FSL_FEATURE_SYSCON_FLASH_PAGE_SIZE_BYTES (256)
 /* @brief Flash sector size in bytes */
@@ -231,6 +258,11 @@
 
 /* @brief Number of the endpoint in USB FS */
 #define FSL_FEATURE_USB_EP_NUM (5)
+
+/* WWDT module features */
+
+/* @brief Has no RESET register. */
+#define FSL_FEATURE_WWDT_HAS_NO_RESET (1)
 
 #endif /* _LPC51U68_FEATURES_H_ */
 

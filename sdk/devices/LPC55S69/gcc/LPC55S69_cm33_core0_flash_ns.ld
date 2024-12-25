@@ -2,20 +2,19 @@
 ** ###################################################################
 **     Processors:          LPC55S69JBD100_cm33_core0
 **                          LPC55S69JBD64_cm33_core0
+**                          LPC55S69JEV59_cm33_core0
 **                          LPC55S69JEV98_cm33_core0
 **
 **     Compiler:            GNU C Compiler
 **     Reference manual:    LPC55S6x/LPC55S2x/LPC552x User manual(UM11126) Rev.1.3  16 May 2019
 **     Version:             rev. 1.1, 2019-05-16
-**     Build:               b190926
+**     Build:               b231019
 **
 **     Abstract:
 **         Linker file for the GNU C Compiler
 **
 **     Copyright 2016 Freescale Semiconductor, Inc.
-**     Copyright 2016-2019 NXP
-**     All rights reserved.
-**
+**     Copyright 2016-2023 NXP
 **     SPDX-License-Identifier: BSD-3-Clause
 **
 **     http:                 www.nxp.com
@@ -38,7 +37,7 @@ MEMORY
 {
   m_interrupts          (RX)  : ORIGIN = 0x00010000, LENGTH = 0x00000200
   m_text                (RX)  : ORIGIN = 0x00010200, LENGTH = 0x00061E00
-  m_core1_image         (RX)  : ORIGIN = 0x00072000, LENGTH = 0x00026000
+  m_core1_image         (RX)  : ORIGIN = 0x00072000, LENGTH = 0x0002B800
   m_data                (RW)  : ORIGIN = 0x20008000, LENGTH = 0x0002A800 - RPMSG_SHMEM_SIZE
   rpmsg_sh_mem          (RW)  : ORIGIN = 0x20033000 - RPMSG_SHMEM_SIZE, LENGTH = RPMSG_SHMEM_SIZE
   m_usb_sram            (RW)  : ORIGIN = 0x40100000, LENGTH = 0x00004000
@@ -48,11 +47,11 @@ MEMORY
 SECTIONS
 {
   /* section for storing the secondary core image */
-  .m0code :
+  .core1_code :
   {
      . = ALIGN(4) ;
-    KEEP (*(.m0code))
-     *(.m0code*)
+    KEEP (*(.core1_code))
+     *(.core1_code*)
      . = ALIGN(4) ;
   } > m_core1_image
 
